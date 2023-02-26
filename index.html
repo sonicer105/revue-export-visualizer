@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        img {
+            width: 100%;
+            height: 300px;
+            object-fit: contain;
+        }
+    </style>
+<script>
+    function sortByIssueThenOrder(a, b) {
+        var i1 = a['issue_id'];
+        var i2 = b['issue_id'];
+
+        var o1 = a['order'];
+        var o2 = b['order'];
+
+        if (i1 < i2) return -1;
+        if (i1 > i2) return 1;
+        if (o1 < o2) return -1;
+        if (o1 > o2) return 1;
+        return 0;
+    }
+
+    fetch('./items.json')
+    .then((response) => response.json())
+    .then(function(json) {
+        json.sort(sortByIssueThenOrder);
+        let issue_id = json[0].issue_id;
+        for (let i in json) {
+            if(issue_id !== json[i].issue_id){
+                issue_id = json[i].issue_id
+                let hr = document.createElement('hr');
+                document.body.appendChild(hr);
+            }
+            if(json[i]['item_type'] == 'image'){
+                let img = new Image();
+                img.alt = json[i]['description'] ?? '';
+                img.src = json[i]['original_image_url'];
+                document.body.appendChild(img);
+
+                if(json[i]['description']){
+                    let div = document.createElement("div");
+                    div.appendChild(document.createTextNode(json[i].description));
+                    document.body.appendChild(div);
+                }
+
+            } else if(json[i]['item_type'] == 'header'){
+                let h1 = document.createElement("h1");
+                h1.appendChild(document.createTextNode(json[i].title));
+                document.body.appendChild(h1);
+
+            } else if(json[i]['item_type'] == 'text'){
+                let div = document.createElement("div");
+                div.insertAdjacentHTML( 'beforeend', json[i].description );
+                document.body.appendChild(div);
+
+            } else if(json[i]['item_type'] == 'link'){
+                if(json[i]['image']){
+                    let img = new Image();
+                    img.src = json[i]['image'];
+                    document.body.appendChild(img);
+                }
+
+                let a = document.createElement("a");
+                a.setAttribute('href', json[i].url);
+                a.appendChild(document.createTextNode(json[i].title));
+                let p = document.createElement("p");
+                p.appendChild(a);
+                document.body.appendChild(p);
+
+                if(json[i]['description']){
+                    let div = document.createElement("div");
+                    div.insertAdjacentHTML( 'beforeend', json[i].description );
+                    document.body.appendChild(div);
+                }
+            }
+        }
+    });
+</script>
+</head>
+<body></body>
+</html>
